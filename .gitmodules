@@ -1,0 +1,9 @@
+[submodule "vendor/github.com/spf13/cobra"]
+	path = vendor/github.com/spf13/cobra
+	url = https://github.com/spf13/cobra
+[submodule "vendor/github.com/spf13/pflag"]
+	path = vendor/github.com/spf13/pflag
+	url = https://github.com/spf13/pflag
+[submodule "vendor/gopkg.in/libgit2/git2go.v22"]
+	path = vendor/gopkg.in/libgit2/git2go.v22
+	url = https://gopkg.in/libgit2/git2go.v22
