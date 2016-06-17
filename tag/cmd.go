@@ -1,12 +1,12 @@
 package tag
 
 import (
-	//	"fmt"
+	"fmt"
 	"os"
 	"text/template"
 
 	"github.com/spf13/cobra"
-	git "gopkg.in/libgit2/git2go.v22"
+	git "gopkg.in/libgit2/git2go.v24"
 )
 
 type tagOpts struct {
@@ -28,7 +28,7 @@ func (opts *tagOpts) run(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	ref, err := repo.LookupReference(opts.ref)
+	ref, err := repo.References.Dwim(opts.ref)
 	if err != nil {
 		return err
 	}
@@ -36,9 +36,11 @@ func (opts *tagOpts) run(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	return tmpl.Execute(os.Stdout, repoState{
+	err = tmpl.Execute(os.Stdout, repoState{
 		Commit: ref.Target().String(),
 	})
+	fmt.Println("")
+	return err
 }
 
 func AddSubcommandTo(cmd *cobra.Command) {
