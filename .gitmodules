@@ -7,3 +7,54 @@
 [submodule "vendor/gopkg.in/libgit2/git2go.v24"]
 	path = vendor/gopkg.in/libgit2/git2go.v24
 	url = https://gopkg.in/libgit2/git2go.v24
+[submodule "vendor/github.com/CenturyLinkLabs/docker-reg-client"]
+	path = vendor/github.com/CenturyLinkLabs/docker-reg-client
+	url = https://github.com/CenturyLinkLabs/docker-reg-client
+[submodule "vendor/golang.org/x/net"]
+	path = vendor/golang.org/x/net
+	url = https://go.googlesource.com/net
+[submodule "vendor/github.com/kr/pty"]
+	path = vendor/github.com/kr/pty
+	url = https://github.com/kr/pty
+[submodule "vendor/github.com/vishvananda/netlink"]
+	path = vendor/github.com/vishvananda/netlink
+	url = https://github.com/vishvananda/netlink
+[submodule "vendor/github.com/vishvananda/netns"]
+	path = vendor/github.com/vishvananda/netns
+	url = https://github.com/vishvananda/netns
+[submodule "vendor/github.com/vbatts/tar-split"]
+	path = vendor/github.com/vbatts/tar-split
+	url = https://github.com/vbatts/tar-split
+[submodule "vendor/github.com/opencontainers/specs"]
+	path = vendor/github.com/opencontainers/specs
+	url = https://github.com/opencontainers/specs
+[submodule "vendor/github.com/gorilla/mux"]
+	path = vendor/github.com/gorilla/mux
+	url = https://github.com/gorilla/mux
+[submodule "vendor/github.com/gorilla/context"]
+	path = vendor/github.com/gorilla/context
+	url = https://github.com/gorilla/context
+[submodule "vendor/google.golang.org/grpc"]
+	path = vendor/google.golang.org/grpc
+	url = https://github.com/grpc/grpc-go
+[submodule "vendor/github.com/golang/protobuf"]
+	path = vendor/github.com/golang/protobuf
+	url = https://github.com/golang/protobuf
+[submodule "vendor/github.com/docker/notary"]
+	path = vendor/github.com/docker/notary
+	url = https://github.com/docker/notary
+[submodule "vendor/github.com/boltdb/bolt"]
+	path = vendor/github.com/boltdb/bolt
+	url = https://github.com/boltdb/bolt
+[submodule "vendor/github.com/coreos/go-systemd"]
+	path = vendor/github.com/coreos/go-systemd
+	url = https://github.com/coreos/go-systemd
+[submodule "vendor/github.com/docker/libkv"]
+	path = vendor/github.com/docker/libkv
+	url = https://github.com/docker/libkv
+[submodule "vendor/github.com/hashicorp/consul"]
+	path = vendor/github.com/hashicorp/consul
+	url = https://github.com/hashicorp/consul
+[submodule "vendor/github.com/coreos/etcd"]
+	path = vendor/github.com/coreos/etcd
+	url = https://github.com/coreos/etcd
