@@ -12,7 +12,7 @@ import (
 type tagOpts struct {
 	template string
 	ref      string
-	repo     string
+	gitrepo  string
 }
 
 type repoState struct {
@@ -24,7 +24,7 @@ func (opts *tagOpts) run(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	repo, err := git.OpenRepository(opts.repo)
+	repo, err := git.OpenRepository(opts.gitrepo)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (opts *tagOpts) run(_ *cobra.Command, args []string) error {
 }
 
 func AddSubcommandTo(cmd *cobra.Command) {
-	opts := tagOpts{}
+	opts := &tagOpts{}
 	subcmd := &cobra.Command{
 		Use:   "tag",
 		Short: "generate an image tag from git state",
@@ -54,7 +54,7 @@ func AddSubcommandTo(cmd *cobra.Command) {
 		"{{.Commit}}", "template for generating a tag")
 	subcmd.Flags().StringVar(&opts.ref, "ref", "HEAD",
 		`git ref to generate tag for; e.g., "master"`)
-	subcmd.Flags().StringVarP(&opts.repo, "repository", "r", ".",
-		"git repository, as a path")
+	subcmd.Flags().StringVarP(&opts.gitrepo, "git-dir", "d", ".",
+		"path to local git repository")
 	cmd.AddCommand(subcmd)
 }
