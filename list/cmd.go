@@ -12,6 +12,7 @@ import (
 	//	"net/http"
 	"net/url"
 	//"os"
+	"sort"
 	"text/tabwriter"
 
 	"github.com/CenturyLinkLabs/docker-reg-client/registry"
@@ -29,6 +30,39 @@ type listOpts struct {
 	useDockerConfig bool
 	username        string
 	password        string
+}
+
+type resultEntry struct {
+	tag      string
+	msg      string
+	commitID *git.Oid
+}
+
+type result struct {
+	repo    *git.Repository
+	entries []*resultEntry
+}
+
+func (result *result) Less(i, j int) bool {
+	if result.entries[i].commitID == nil {
+		return false
+	} else if result.entries[j].commitID == nil {
+		return true
+	}
+	// Define: A < B iff A is a descendant of B, i.e., comes after it in git history
+	res, err := result.repo.DescendantOf(result.entries[i].commitID, result.entries[j].commitID)
+	// assume an error indicates no relative ordering
+	return (err == nil) && res
+}
+
+func (result *result) Swap(i, j int) {
+	t := result.entries[i]
+	result.entries[i] = result.entries[j]
+	result.entries[j] = t
+}
+
+func (result *result) Len() int {
+	return len(result.entries)
 }
 
 func (opts *listOpts) run(_ *cobra.Command, args []string) error {
@@ -79,11 +113,14 @@ func (opts *listOpts) run(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	out := tabwriter.NewWriter(os.Stdout, 0, 4, 1, ' ', 0)
-	for tag, _ := range tags {
-		fmt.Fprint(out, tag)
-		if repo != nil {
-			fmt.Fprint(out, "\t")
+	if repo != nil {
+		result := &result{repo, make([]*resultEntry, len(tags))}
+		i := 0
+		for tag, _ := range tags {
+			entry := &resultEntry{tag: tag}
+			result.entries[i] = entry
+			i++
+
 			additional := ""
 			// hard-code tag format for now
 			if strings.HasSuffix(tag, "-WIP") {
@@ -92,15 +129,29 @@ func (opts *listOpts) run(_ *cobra.Command, args []string) error {
 			}
 			commit, otherwise := commitFromTag(repo, tag)
 			if otherwise != "" {
-				fmt.Fprintf(out, otherwise)
+				entry.msg = otherwise
 			} else {
-				fmt.Fprintf(out, strings.Split(commit.Message(), "\n")[0])
+				entry.commitID = commit.Id()
+				entry.msg = strings.Split(commit.Message(), "\n")[0]
 			}
-			fmt.Fprintf(out, additional)
+			entry.msg = entry.msg + additional
 		}
-		fmt.Fprint(out, "\n")
+		sort.Sort(result)
+
+		out := tabwriter.NewWriter(os.Stdout, 0, 4, 1, ' ', 0)
+		for _, entry := range result.entries {
+			fmt.Fprint(out, entry.tag)
+			fmt.Fprint(out, "\t")
+			fmt.Fprint(out, entry.msg)
+			fmt.Fprint(out, "\n")
+		}
+		out.Flush()
+	} else {
+		for tag, _ := range tags {
+			fmt.Println(tag)
+		}
 	}
-	out.Flush()
+
 	return nil
 }
 
