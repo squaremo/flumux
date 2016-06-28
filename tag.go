@@ -1,4 +1,4 @@
-package tag
+package main
 
 import (
 	"fmt"
@@ -43,7 +43,7 @@ func (opts *tagOpts) run(_ *cobra.Command, args []string) error {
 	return err
 }
 
-func AddSubcommandTo(cmd *cobra.Command) {
+func addTagCommand(cmd *cobra.Command) {
 	opts := &tagOpts{}
 	subcmd := &cobra.Command{
 		Use:   "tag",

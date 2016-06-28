@@ -1,4 +1,4 @@
-package list
+package main
 
 import (
 	//	"encoding/json"
@@ -171,7 +171,7 @@ func commitFromTag(repo *git.Repository, tag string) (*git.Commit, string) {
 	return commit, ""
 }
 
-func AddSubcommandTo(cmd *cobra.Command) {
+func addListCommand(cmd *cobra.Command) {
 	opts := &listOpts{}
 	subcmd := &cobra.Command{
 		Use:   "list <image>",
