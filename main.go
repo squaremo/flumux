@@ -14,6 +14,7 @@ func main() {
 	}
 	addTagCommand(topCmd)
 	addListCommand(topCmd)
+	addLatestCommand(topCmd)
 
 	if err := topCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

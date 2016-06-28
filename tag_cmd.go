@@ -6,13 +6,12 @@ import (
 	"text/template"
 
 	"github.com/spf13/cobra"
-	git "gopkg.in/libgit2/git2go.v24"
 )
 
 type tagOpts struct {
 	template string
 	ref      string
-	gitrepo  string
+	gitOpts
 }
 
 type repoState struct {
@@ -24,7 +23,7 @@ func (opts *tagOpts) run(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	repo, err := git.OpenRepository(opts.gitrepo)
+	repo, err := opts.openRepository()
 	if err != nil {
 		return err
 	}
@@ -54,7 +53,6 @@ func addTagCommand(cmd *cobra.Command) {
 		"{{.Commit}}", "template for generating a tag")
 	subcmd.Flags().StringVar(&opts.ref, "ref", "HEAD",
 		`git ref to generate tag for; e.g., "master"`)
-	subcmd.Flags().StringVarP(&opts.gitrepo, "git-dir", "d", ".",
-		"path to local git repository")
+	opts.addGitFlags(subcmd)
 	cmd.AddCommand(subcmd)
 }
