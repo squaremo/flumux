@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sort"
-	"strings"
 
 	"github.com/spf13/cobra"
 	git "gopkg.in/libgit2/git2go.v24"
@@ -52,32 +50,10 @@ func (opts *latestOpts) run(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	result := &result{repo, make([]*resultEntry, len(tags))}
-	i := 0
-	for tag, _ := range tags {
-		entry := &resultEntry{tag: tag}
-		result.entries[i] = entry
-		i++
+	images := makeImageHistory(tags, repo)
 
-		additional := ""
-		// hard-code tag format for now
-		if strings.HasSuffix(tag, "-WIP") {
-			additional = " (uncommitted changes)"
-			tag = tag[:len(tag)-4]
-		}
-		commit, otherwise := commitFromTag(repo, tag)
-		if otherwise != "" {
-			entry.msg = otherwise
-		} else {
-			entry.commitID = commit.Id()
-			entry.msg = strings.Split(commit.Message(), "\n")[0]
-		}
-		entry.msg = entry.msg + additional
-	}
-	sort.Sort(result)
-
-	if result.Len() > 0 {
-		fmt.Printf("%s:%s\n", image, result.entries[0].tag)
+	if len(images) > 0 {
+		fmt.Printf("%s:%s\n", image, images[0].tag)
 	} else {
 		return fmt.Errorf("no result (no images, or no images that correspond to a commit)")
 	}
