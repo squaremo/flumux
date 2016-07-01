@@ -29,7 +29,7 @@ type registryClient struct {
 	auth registry.Authenticator
 }
 
-func (opts *listOpts) addRegistryFlags(cmd *cobra.Command) {
+func (opts *registryOpts) addRegistryFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&opts.registry, "image-registry", DockerHub, "image registry to query")
 	cmd.Flags().StringVar(&opts.username, "username", "", "username to use in basic authentication")
 	cmd.Flags().StringVar(&opts.password, "password", "", "password to use in basic authentication")
