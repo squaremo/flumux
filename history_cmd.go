@@ -26,12 +26,7 @@ func (opts *listOpts) run(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("expected argument <image> and optionally, <revision range>")
 	}
 
-	var (
-		repo *git.Repository
-		err  error
-	)
-
-	repo, err = opts.openRepository()
+	repo, err := opts.openRepository()
 	if err != nil {
 		return err
 	}
@@ -62,18 +57,14 @@ func (opts *listOpts) run(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	commits := tagsToCommits(repo, tags)
-
 	out := tabwriter.NewWriter(os.Stdout, 0, 4, 1, ' ', 0)
-	walk.Iterate(func(commit *git.Commit) bool {
-		if tag, found := commits[commit.Id().String()]; found {
-			fmt.Fprint(out, imageName(image, tag))
-			fmt.Fprint(out, "\t")
-			fmt.Fprint(out, commit.Summary())
-			fmt.Fprint(out, "\n")
-			delete(commits, commit.Id().String())
-		}
-		return len(commits) > 0
+
+	repo.iterateImages(walk, tags, func(tag string, commit *git.Commit) bool {
+		fmt.Fprint(out, imageName(image, tag))
+		fmt.Fprint(out, "\t")
+		fmt.Fprint(out, commit.Summary())
+		fmt.Fprint(out, "\n")
+		return true
 	})
 	out.Flush()
 	return nil

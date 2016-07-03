@@ -34,12 +34,7 @@ func (opts *closestOpts) run(_ *cobra.Command, args []string) error {
 	}
 	image := args[0]
 
-	var (
-		repo *git.Repository
-		err  error
-	)
-
-	repo, err = opts.openRepository()
+	repo, err := opts.openRepository()
 	if err != nil {
 		return err
 	}
@@ -66,8 +61,6 @@ func (opts *closestOpts) run(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	commits := tagsToCommits(repo, tags)
-
 	walk, err := repo.Walk()
 	if err != nil {
 		return err
@@ -82,13 +75,10 @@ func (opts *closestOpts) run(_ *cobra.Command, args []string) error {
 			return err
 		}
 	}
-	walk.Iterate(func(commit *git.Commit) bool {
-		if tag, found := commits[commit.Id().String()]; found {
-			fmt.Println(imageName(image, tag))
-			delete(commits, commit.Id().String())
-		}
-		return len(commits) > 0
-	})
 
+	repo.iterateImages(walk, tags, func(tag string, commit *git.Commit) bool {
+		fmt.Println(imageName(image, tag))
+		return true
+	})
 	return nil
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -19,11 +18,16 @@ func (opts *gitOpts) addGitFlags(cmd *cobra.Command) {
 		"path to git repository")
 }
 
-func (opts *gitOpts) openRepository() (*git.Repository, error) {
-	return git.OpenRepository(opts.gitrepo)
+type repository struct{ *git.Repository }
+
+func (opts *gitOpts) openRepository() (repository, error) {
+	repo := repository{}
+	var err error
+	repo.Repository, err = git.OpenRepository(opts.gitrepo)
+	return repo, err
 }
 
-func commitFromTag(repo *git.Repository, tag string) (*git.Commit, string) {
+func (repo repository) commitFromTag(tag string) (*git.Commit, string) {
 	bits := strings.Split(tag, "-")
 	if len(bits) != 2 {
 		return nil, "tag does not correspond to a commit"
@@ -41,10 +45,10 @@ func commitFromTag(repo *git.Repository, tag string) (*git.Commit, string) {
 
 // take a map of tag -> whatever and return a map of commit ID -> tag,
 // discarding any tags that don't correspond to a commit
-func tagsToCommits(repo *git.Repository, tags map[string]string) map[string]string {
+func (repo repository) tagsToCommits(tags map[string]string) map[string]string {
 	commits := make(map[string]string)
 	for tag, _ := range tags {
-		commit, _ := commitFromTag(repo, tag)
+		commit, _ := repo.commitFromTag(tag)
 		if commit != nil {
 			commits[commit.Id().String()] = tag
 		} else {
@@ -54,62 +58,15 @@ func tagsToCommits(repo *git.Repository, tags map[string]string) map[string]stri
 	return commits
 }
 
-func makeImageHistory(tags map[string]string, repo *git.Repository) []*image {
-	result := &imageList{repo, make([]*image, len(tags))}
-	i := 0
-	for tag, _ := range tags {
-		entry := &image{tag: tag}
-		result.entries[i] = entry
-		i++
+type imageIterator func(string, *git.Commit) bool
 
-		additional := ""
-		// hard-code tag format for now
-		if strings.HasSuffix(tag, "-WIP") {
-			additional = " (uncommitted changes)"
-			tag = tag[:len(tag)-4]
+func (repo repository) iterateImages(walk *git.RevWalk, tags map[string]string, visit imageIterator) {
+	commits := repo.tagsToCommits(tags)
+	walk.Iterate(func(commit *git.Commit) bool {
+		if tag, found := commits[commit.Id().String()]; found {
+			delete(commits, commit.Id().String())
+			return visit(tag, commit) && len(commits) > 0
 		}
-		commit, otherwise := commitFromTag(repo, tag)
-		if otherwise != "" {
-			entry.msg = otherwise
-		} else {
-			entry.commitID = commit.Id()
-			entry.msg = strings.Split(commit.Message(), "\n")[0]
-		}
-		entry.msg = entry.msg + additional
-	}
-	sort.Sort(result)
-	return result.entries
-}
-
-type image struct {
-	tag      string
-	msg      string
-	commitID *git.Oid
-}
-
-type imageList struct {
-	repo    *git.Repository
-	entries []*image
-}
-
-func (result *imageList) Less(i, j int) bool {
-	if result.entries[i].commitID == nil {
-		return false
-	} else if result.entries[j].commitID == nil {
 		return true
-	}
-	// Define: A < B iff A is a descendant of B, i.e., comes after it in git history
-	res, err := result.repo.DescendantOf(result.entries[i].commitID, result.entries[j].commitID)
-	// assume an error indicates no relative ordering
-	return (err == nil) && res
-}
-
-func (result *imageList) Swap(i, j int) {
-	t := result.entries[i]
-	result.entries[i] = result.entries[j]
-	result.entries[j] = t
-}
-
-func (result *imageList) Len() int {
-	return len(result.entries)
+	})
 }

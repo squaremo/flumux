@@ -30,15 +30,21 @@ func (opts *latestOpts) run(_ *cobra.Command, args []string) error {
 	}
 	image := args[0]
 
-	var (
-		repo *git.Repository
-		err  error
-	)
-
-	repo, err = opts.openRepository()
+	repo, err := opts.openRepository()
 	if err != nil {
 		return err
 	}
+
+	walk, err := repo.Walk()
+	if err != nil {
+		return err
+	}
+	err = walk.PushHead()
+	if err != nil {
+		return err
+	}
+
+	walk.Sorting(git.SortTopological)
 
 	regClient, err := opts.newRegistryClient(image)
 	if err != nil {
@@ -50,13 +56,15 @@ func (opts *latestOpts) run(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	images := makeImageHistory(tags, repo)
+	done := false
+	repo.iterateImages(walk, tags, func(tag string, _ *git.Commit) bool {
+		done = true
+		fmt.Println(imageName(image, tag))
+		return false
+	})
 
-	if len(images) > 0 {
-		fmt.Printf("%s:%s\n", image, images[0].tag)
-	} else {
+	if !done {
 		return fmt.Errorf("no result (no images, or no images that correspond to a commit)")
 	}
-
 	return nil
 }
