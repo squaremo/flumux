@@ -14,6 +14,7 @@ func main() {
 	}
 	addTagCommand(topCmd)
 	addHistoryCommand(topCmd)
+	addLookupCommand(topCmd)
 	addLatestCommand(topCmd)
 	addClosestCommand(topCmd)
 

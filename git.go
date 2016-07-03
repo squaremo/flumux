@@ -32,11 +32,11 @@ func (repo repository) commitFromTag(tag string) (*git.Commit, string) {
 	if len(bits) != 2 {
 		return nil, "tag does not correspond to a commit"
 	}
-	commitRev, err := repo.RevparseSingle(bits[1])
+	commitObj, err := repo.RevparseSingle(bits[1])
 	if err != nil {
 		return nil, err.Error()
 	}
-	commit, err := commitRev.AsCommit()
+	commit, err := commitObj.AsCommit()
 	if err != nil {
 		return nil, err.Error()
 	}
