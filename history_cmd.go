@@ -31,16 +31,6 @@ func (opts *listOpts) run(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	regClient, err := opts.newRegistryClient(image)
-	if err != nil {
-		return err
-	}
-
-	tags, err := regClient.Repository.ListTags(image, regClient.auth)
-	if err != nil {
-		return err
-	}
-
 	walk, err := repo.Walk()
 	if err != nil {
 		return err
@@ -55,6 +45,16 @@ func (opts *listOpts) run(_ *cobra.Command, args []string) error {
 		if err := walk.PushHead(); err != nil {
 			return err
 		}
+	}
+
+	regClient, err := opts.newRegistryClient(image)
+	if err != nil {
+		return err
+	}
+
+	tags, err := regClient.Repository.ListTags(image, regClient.auth)
+	if err != nil {
+		return err
 	}
 
 	out := tabwriter.NewWriter(os.Stdout, 0, 4, 1, ' ', 0)

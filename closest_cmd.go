@@ -51,16 +51,6 @@ func (opts *closestOpts) run(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	regClient, err := opts.newRegistryClient(image)
-	if err != nil {
-		return err
-	}
-
-	tags, err := regClient.Repository.ListTags(image, regClient.auth)
-	if err != nil {
-		return err
-	}
-
 	walk, err := repo.Walk()
 	if err != nil {
 		return err
@@ -74,6 +64,16 @@ func (opts *closestOpts) run(_ *cobra.Command, args []string) error {
 		if err := walk.Hide(refObj.Id()); err != nil {
 			return err
 		}
+	}
+
+	regClient, err := opts.newRegistryClient(image)
+	if err != nil {
+		return err
+	}
+
+	tags, err := regClient.Repository.ListTags(image, regClient.auth)
+	if err != nil {
+		return err
 	}
 
 	repo.iterateImages(walk, tags, func(tag string, commit *git.Commit) bool {
