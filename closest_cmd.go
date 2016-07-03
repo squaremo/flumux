@@ -2,14 +2,17 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
+	git "gopkg.in/libgit2/git2go.v24"
 )
 
 type closestOpts struct {
 	gitOpts
 	registryOpts
-	head string
+	head     string
+	ancestor string
 }
 
 func addClosestCommand(top *cobra.Command) {
@@ -21,17 +24,80 @@ func addClosestCommand(top *cobra.Command) {
 	}
 	opts.addGitFlags(cmd)
 	opts.addRegistryFlags(cmd)
-	cmd.Flags().StringVar(&opts.head, "head", "master",
-		"a ref of which the image commit must be an ancestor; e.g,. used to specify a branch into which it must have been merged")
+	cmd.Flags().StringVar(&opts.head, "head", "master", "treat this ref as the git repo head")
+	cmd.Flags().StringVar(&opts.ancestor, "ancestor", "", "stop at this ref")
 	top.AddCommand(cmd)
 }
 
 func (opts *closestOpts) run(_ *cobra.Command, args []string) error {
-	if len(args) != 2 {
-		return fmt.Errorf("expected arguments <image> and <ref>")
+	if len(args) != 1 {
+		return fmt.Errorf("expected argument <image>")
 	}
 	image := args[0]
-	ref := args[1]
-	fmt.Printf("closest %s %s\n", image, ref)
+
+	var (
+		repo *git.Repository
+		err  error
+	)
+
+	repo, err = opts.openRepository()
+	if err != nil {
+		return err
+	}
+
+	headObj, err := repo.RevparseSingle(opts.head)
+	if err != nil {
+		return err
+	}
+	var refObj *git.Object
+	if opts.ancestor != "" {
+		refObj, err = repo.RevparseSingle(opts.ancestor)
+		if err != nil {
+			return err
+		}
+	}
+
+	regClient, err := opts.newRegistryClient(image)
+	if err != nil {
+		return err
+	}
+
+	tags, err := regClient.Repository.ListTags(image, regClient.auth)
+	if err != nil {
+		return err
+	}
+
+	commits := make(map[string]string)
+	for tag, _ := range tags {
+		commit, _ := commitFromTag(repo, tag)
+		if commit != nil {
+			commits[commit.Id().String()] = tag
+		} else {
+			fmt.Fprintf(os.Stderr, "No commit found for tag %s\n", tag)
+		}
+	}
+
+	walk, err := repo.Walk()
+	if err != nil {
+		return err
+	}
+	walk.Sorting(git.SortTopological)
+
+	if err := walk.Push(headObj.Id()); err != nil {
+		return err
+	}
+	if refObj != nil {
+		if err := walk.Hide(refObj.Id()); err != nil {
+			return err
+		}
+	}
+	walk.Iterate(func(commit *git.Commit) bool {
+		if tag, found := commits[commit.Id().String()]; found {
+			fmt.Printf("%s:%s\n", image, tag)
+			delete(commits, commit.Id().String())
+		}
+		return len(commits) > 0
+	})
+
 	return nil
 }
