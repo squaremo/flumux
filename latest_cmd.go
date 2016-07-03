@@ -13,7 +13,7 @@ type latestOpts struct {
 }
 
 func addLatestCommand(top *cobra.Command) {
-	opts := latestOpts{}
+	opts := &latestOpts{}
 	cmd := &cobra.Command{
 		Use:   "latest",
 		Short: "output the name of the latest image, relative to the git revision given",

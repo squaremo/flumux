@@ -15,7 +15,7 @@ type closestOpts struct {
 }
 
 func addClosestCommand(top *cobra.Command) {
-	opts := closestOpts{}
+	opts := &closestOpts{}
 	cmd := &cobra.Command{
 		Use:   "closest <image> <ref>",
 		Short: "give the oldest version of <image> that is after <ref>",
