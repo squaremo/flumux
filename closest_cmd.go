@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 	git "gopkg.in/libgit2/git2go.v24"
@@ -67,15 +66,7 @@ func (opts *closestOpts) run(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	commits := make(map[string]string)
-	for tag, _ := range tags {
-		commit, _ := commitFromTag(repo, tag)
-		if commit != nil {
-			commits[commit.Id().String()] = tag
-		} else {
-			fmt.Fprintf(os.Stderr, "No commit found for tag %s\n", tag)
-		}
-	}
+	commits := tagsToCommits(repo, tags)
 
 	walk, err := repo.Walk()
 	if err != nil {
@@ -93,7 +84,7 @@ func (opts *closestOpts) run(_ *cobra.Command, args []string) error {
 	}
 	walk.Iterate(func(commit *git.Commit) bool {
 		if tag, found := commits[commit.Id().String()]; found {
-			fmt.Printf("%s:%s\n", image, tag)
+			fmt.Println(imageName(image, tag))
 			delete(commits, commit.Id().String())
 		}
 		return len(commits) > 0

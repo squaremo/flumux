@@ -14,6 +14,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func imageName(image, tag string) string {
+	return fmt.Sprintf("%s:%s", image, tag)
+}
+
 const DockerConfigFile = "~/.docker/config.json"
 const DockerHub = "https://index.docker.io/v1/"
 

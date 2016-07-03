@@ -13,7 +13,7 @@ func main() {
 		Short: "container platform multitool",
 	}
 	addTagCommand(topCmd)
-	addListCommand(topCmd)
+	addHistoryCommand(topCmd)
 	addLatestCommand(topCmd)
 	addClosestCommand(topCmd)
 

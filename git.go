@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"sort"
 	"strings"
 
@@ -35,6 +37,21 @@ func commitFromTag(repo *git.Repository, tag string) (*git.Commit, string) {
 		return nil, err.Error()
 	}
 	return commit, ""
+}
+
+// take a map of tag -> whatever and return a map of commit ID -> tag,
+// discarding any tags that don't correspond to a commit
+func tagsToCommits(repo *git.Repository, tags map[string]string) map[string]string {
+	commits := make(map[string]string)
+	for tag, _ := range tags {
+		commit, _ := commitFromTag(repo, tag)
+		if commit != nil {
+			commits[commit.Id().String()] = tag
+		} else {
+			fmt.Fprintf(os.Stderr, "No commit found for tag %s\n", tag)
+		}
+	}
+	return commits
 }
 
 func makeImageHistory(tags map[string]string, repo *git.Repository) []*image {
