@@ -10,17 +10,19 @@ import (
 type latestOpts struct {
 	registryOpts
 	gitOpts
+	head string
 }
 
 func addLatestCommand(top *cobra.Command) {
 	opts := &latestOpts{}
 	cmd := &cobra.Command{
 		Use:   "latest",
-		Short: "output the name of the latest image, relative to the git revision given",
+		Short: "output the name of the latest image relative to the head revision",
 		RunE:  opts.run,
 	}
 	opts.addGitFlags(cmd)
 	opts.addRegistryFlags(cmd)
+	cmd.Flags().StringVar(&opts.head, "head", "master", "treat this as the head revision")
 	top.AddCommand(cmd)
 }
 
@@ -35,11 +37,20 @@ func (opts *latestOpts) run(_ *cobra.Command, args []string) error {
 		return err
 	}
 
+	head, err := repo.References.Dwim(opts.head)
+	if err != nil {
+		return err
+	}
+	headObj, err := head.Resolve()
+	if err != nil {
+		return err
+	}
+
 	walk, err := repo.Walk()
 	if err != nil {
 		return err
 	}
-	err = walk.PushHead()
+	err = walk.Push(headObj.Target())
 	if err != nil {
 		return err
 	}

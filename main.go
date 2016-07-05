@@ -13,10 +13,8 @@ func main() {
 		Short: "container platform multitool",
 	}
 	addTagCommand(topCmd)
-	addHistoryCommand(topCmd)
 	addLookupCommand(topCmd)
 	addLatestCommand(topCmd)
-	addClosestCommand(topCmd)
 
 	if err := topCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
