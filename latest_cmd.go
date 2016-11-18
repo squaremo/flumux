@@ -30,7 +30,11 @@ func (opts *latestOpts) run(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("expected argument <image>")
 	}
-	image := args[0]
+	imageRepo := args[0]
+	_, image, _, err := imageParts(imageRepo)
+	if err != nil {
+		return err
+	}
 
 	repo, err := opts.openRepository()
 	if err != nil {
@@ -57,7 +61,7 @@ func (opts *latestOpts) run(_ *cobra.Command, args []string) error {
 
 	walk.Sorting(git.SortTopological)
 
-	regClient, err := opts.newRegistryClient(image)
+	regClient, err := opts.newRegistryClient(imageRepo)
 	if err != nil {
 		return err
 	}

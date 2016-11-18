@@ -18,8 +18,11 @@ func imageName(image, tag string) string {
 	return fmt.Sprintf("%s:%s", image, tag)
 }
 
-const DockerConfigFile = "~/.docker/config.json"
-const DockerHub = "https://index.docker.io/v1/"
+const (
+	dockerConfigFile = "~/.docker/config.json"
+	dockerHubHost    = "index.docker.io"
+	dockerHubLibrary = "library"
+)
 
 type registryOpts struct {
 	registry        string
@@ -34,17 +37,54 @@ type registryClient struct {
 }
 
 func (opts *registryOpts) addRegistryFlags(cmd *cobra.Command) {
-	cmd.Flags().StringVar(&opts.registry, "image-registry", DockerHub, "image registry to query")
 	cmd.Flags().StringVar(&opts.username, "username", "", "username to use in basic authentication")
 	cmd.Flags().StringVar(&opts.password, "password", "", "password to use in basic authentication")
-	cmd.Flags().BoolVar(&opts.useDockerConfig, "use-docker-config", true, fmt.Sprintf("look up the authentication token in %s", DockerConfigFile))
+	cmd.Flags().BoolVar(&opts.useDockerConfig, "use-docker-config", true, fmt.Sprintf("look up the authentication token in %s", dockerConfigFile))
 }
 
-func (opts *registryOpts) newRegistryClient(image string) (*registryClient, error) {
-	baseURL, err := url.Parse(opts.registry)
-	if err != nil {
-		return nil, err
+func imageParts(repo string) (host, image, tag string, err error) {
+	var org, imageAndTag string
+	parts := strings.Split(repo, "/")
+	switch len(parts) {
+	case 1:
+		host = dockerHubHost
+		org = dockerHubLibrary
+		imageAndTag = parts[0]
+	case 2:
+		host = dockerHubHost
+		org = parts[0]
+		imageAndTag = parts[1]
+	case 3:
+		host = parts[0]
+		org = parts[1]
+		imageAndTag = parts[2]
+	default:
+		return "", "", "", fmt.Errorf(`expected image name as either "host/org/image[:tag]", "org/image[:tag]", or "image:[tag]"`)
 	}
+
+	imageParts := strings.SplitN(imageAndTag, ":", 2)
+	switch len(imageParts) {
+	case 1:
+		image = org + "/" + imageAndTag
+	case 2:
+		image = org + "/" + imageParts[0]
+		tag = imageParts[1]
+	}
+	return
+}
+
+func (opts *registryOpts) newRegistryClient(repository string) (*registryClient, error) {
+	host, image, _, err := imageParts(repository)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to parse image repository %s", repository)
+	}
+
+	baseURLStr := "https://" + host + "/v1/"
+	baseURL, err := url.Parse(baseURLStr)
+	if err != nil {
+		return nil, fmt.Errorf("Somehow failed to parse URL I constructed myself: %s", baseURLStr)
+	}
+
 	// See if we can find some way to authenticate
 	var auth registry.Authenticator = registry.NilAuth{}
 
@@ -57,13 +97,9 @@ func (opts *registryOpts) newRegistryClient(image string) (*registryClient, erro
 	client := registry.NewClient()
 	client.BaseURL = baseURL
 
-	// If it's Docker hub (and possibly others?), we have to go
-	// through this extra step of getting a token
-	if opts.registry == DockerHub {
-		auth, err = client.Hub.GetReadTokenWithAuth(image, auth)
-		if err != nil {
-			return nil, err
-		}
+	auth, err = client.Hub.GetReadTokenWithAuth(image, auth)
+	if err != nil {
+		return nil, err
 	}
 
 	return &registryClient{Client: client, auth: auth}, nil
@@ -105,7 +141,7 @@ func findConfiguredAuth(baseURL *url.URL) registry.Authenticator {
 }
 
 func loadDockerConfig() (*dockerConfig, error) {
-	path, err := homedir.Expand(DockerConfigFile)
+	path, err := homedir.Expand(dockerConfigFile)
 	if err != nil {
 		panic(err)
 	}

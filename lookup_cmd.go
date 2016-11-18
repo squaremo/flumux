@@ -30,14 +30,18 @@ func (opts *lookupOpts) run(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("expected argument <image>")
 	}
-	image := args[0]
+	repository := args[0]
+	_, image, _, err := imageParts(repository)
+	if err != nil {
+		return err
+	}
 
 	repo, err := opts.openRepository()
 	if err != nil {
 		return err
 	}
 
-	regClient, err := opts.newRegistryClient(image)
+	regClient, err := opts.newRegistryClient(repository)
 	if err != nil {
 		return err
 	}
