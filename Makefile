@@ -1,14 +1,12 @@
-PACKAGE:=github.com/squaremo/flumux
-SUBCOMMANDS:=tag list
+BIN:=flumux
+LDFLAGS:=
 
 .PHONY: all clean
 
 all: flumux
 
 clean:
-	rm -rf build flumux
+	rm -rf ${BIN}
 
-flumux: *.go
-	mkdir -p build/src/$(PACKAGE)
-	cp -R *.go vendor build/src/$(PACKAGE)/
-	GO15VENDOREXPERIMENT=1 GOPATH=`pwd`/build go build -o $@ build/src/$(PACKAGE)/*.go
+${BIN}: *.go Gopkg.toml Gopkg.lock
+	go build -ldflags="${LDFLAGS}" -o $@ .
