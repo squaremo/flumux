@@ -36,17 +36,18 @@ output, e.g.,
 
 ## To build in a cloned repository
 
-You can also build it in the repository. The Go dependencies are
-submodules; you need a
+You can also build it in the repository. `dep` is used to manage dependencies:
 
-    git submodule update --init --recursive
-
-to fetch those.
+    go get -u github.com/golang/dep/cmd/dep
+    dep ensure
 
 After that, a simple
 
     make
 
-will build the binary, and put it in the top directory. You don't need
-to use Go's funny path scheme, but if you do, it will still work
-(albeit by ignoring your `$GOPATH`).
+will build the binary, and put it in the top directory.
+
+On MacOS, you may get a binary which immediately exits with `Killed:
+9`. If so, try building with
+
+    make LDFLAGS="-s"
