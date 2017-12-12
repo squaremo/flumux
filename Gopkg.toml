@@ -19,10 +19,9 @@
 #  name = "github.com/x/y"
 #  version = "2.4.0"
 
-
 [[constraint]]
-  branch = "master"
-  name = "github.com/CenturyLinkLabs/docker-reg-client"
+  name = "github.com/weaveworks/flux"
+  branch = "image-reg-caching"
 
 [[constraint]]
   branch = "master"

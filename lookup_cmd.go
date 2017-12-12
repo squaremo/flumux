@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"bufio"
 	"fmt"
 	"os"
@@ -30,7 +31,11 @@ func (opts *lookupOpts) run(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("expected argument <image>")
 	}
-	image := args[0]
+	imageStr := args[0]
+	image, err := parseImage(imageStr)
+	if err != nil {
+		return err
+	}
 
 	repo, err := opts.openRepository()
 	if err != nil {
@@ -42,7 +47,8 @@ func (opts *lookupOpts) run(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	tags, err := regClient.Repository.ListTags(image, regClient.auth)
+	ctx := context.Background()
+	tags, err := regClient.Tags(ctx)
 	if err != nil {
 		return err
 	}
