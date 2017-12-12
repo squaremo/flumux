@@ -45,9 +45,9 @@ func (repo repository) commitFromTag(tag string) (*git.Commit, string) {
 
 // take a map of tag -> whatever and return a map of commit ID -> tag,
 // discarding any tags that don't correspond to a commit
-func (repo repository) tagsToCommits(tags map[string]string) map[string]string {
+func (repo repository) tagsToCommits(tags []string) map[string]string {
 	commits := make(map[string]string)
-	for tag, _ := range tags {
+	for _, tag := range tags {
 		commit, _ := repo.commitFromTag(tag)
 		if commit != nil {
 			commits[commit.Id().String()] = tag
@@ -60,7 +60,7 @@ func (repo repository) tagsToCommits(tags map[string]string) map[string]string {
 
 type imageIterator func(string, *git.Commit) bool
 
-func (repo repository) iterateImages(walk *git.RevWalk, tags map[string]string, visit imageIterator) {
+func (repo repository) iterateImages(walk *git.RevWalk, tags []string, visit imageIterator) {
 	commits := repo.tagsToCommits(tags)
 	walk.Iterate(func(commit *git.Commit) bool {
 		if tag, found := commits[commit.Id().String()]; found {

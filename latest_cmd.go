@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"context"
 
 	"github.com/spf13/cobra"
 	git "gopkg.in/libgit2/git2go.v24"
@@ -17,12 +18,12 @@ func addLatestCommand(top *cobra.Command) {
 	opts := &latestOpts{}
 	cmd := &cobra.Command{
 		Use:   "latest",
-		Short: "output the name of the latest image relative to the head revision",
+		Short: "output the name of the latest image relative to a git ref",
 		RunE:  opts.run,
 	}
 	opts.addGitFlags(cmd)
 	opts.addRegistryFlags(cmd)
-	cmd.Flags().StringVar(&opts.head, "head", "master", "treat this as the head revision")
+	cmd.Flags().StringVar(&opts.head, "ref", "master", "look for the latest image relative to this ref")
 	top.AddCommand(cmd)
 }
 
@@ -30,8 +31,8 @@ func (opts *latestOpts) run(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("expected argument <image>")
 	}
-	imageRepo := args[0]
-	_, image, _, err := imageParts(imageRepo)
+	imageStr := args[0]
+	image, err := parseImage(imageStr)
 	if err != nil {
 		return err
 	}
@@ -61,12 +62,13 @@ func (opts *latestOpts) run(_ *cobra.Command, args []string) error {
 
 	walk.Sorting(git.SortTopological)
 
-	regClient, err := opts.newRegistryClient(imageRepo)
+	regClient, err := opts.newRegistryClient(image)
 	if err != nil {
 		return err
 	}
 
-	tags, err := regClient.Repository.ListTags(image, regClient.auth)
+	ctx := context.Background()
+	tags, err := regClient.Tags(ctx)
 	if err != nil {
 		return err
 	}
