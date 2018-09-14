@@ -2,10 +2,10 @@
 
 
 [[projects]]
-  branch = "master"
-  name = "github.com/CenturyLinkLabs/docker-reg-client"
-  packages = ["registry"]
-  revision = "1f659e57f245f93fb2ca413f7df4483bdcf83fb4"
+  name = "github.com/Masterminds/semver"
+  packages = ["."]
+  revision = "c7af12943936e8c39859482e61f0574c2fd7fc75"
+  version = "v1.4.2"
 
 [[projects]]
   branch = "master"
@@ -16,7 +16,23 @@
 [[projects]]
   branch = "master"
   name = "github.com/docker/distribution"
-  packages = [".","digestset","manifest","manifest/manifestlist","manifest/schema1","manifest/schema2","reference","registry/api/errcode","registry/api/v2","registry/client","registry/client/auth","registry/client/auth/challenge","registry/client/transport","registry/storage/cache","registry/storage/cache/memory"]
+  packages = [
+    ".",
+    "digestset",
+    "manifest",
+    "manifest/manifestlist",
+    "manifest/schema1",
+    "manifest/schema2",
+    "reference",
+    "registry/api/errcode",
+    "registry/api/v2",
+    "registry/client",
+    "registry/client/auth",
+    "registry/client/auth/challenge",
+    "registry/client/transport",
+    "registry/storage/cache",
+    "registry/storage/cache/memory"
+  ]
   revision = "f4118485915abb8b163442717326597908eee6aa"
 
 [[projects]]
@@ -27,7 +43,12 @@
 
 [[projects]]
   name = "github.com/go-kit/kit"
-  packages = ["log","metrics","metrics/internal/lv","metrics/prometheus"]
+  packages = [
+    "log",
+    "metrics",
+    "metrics/internal/lv",
+    "metrics/prometheus"
+  ]
   revision = "4dc7be5d2d12881735283bcab7352178e190fc71"
   version = "v0.6.0"
 
@@ -98,10 +119,13 @@
   version = "v0.8.0"
 
 [[projects]]
+  branch = "master"
   name = "github.com/prometheus/client_golang"
-  packages = ["prometheus"]
-  revision = "c5b7fccd204277076155f10851dad72b76a49317"
-  version = "v0.8.0"
+  packages = [
+    "prometheus",
+    "prometheus/internal"
+  ]
+  revision = "b7b390014bf2ea0679a8e477638afa1b706cbd70"
 
 [[projects]]
   branch = "master"
@@ -112,13 +136,20 @@
 [[projects]]
   branch = "master"
   name = "github.com/prometheus/common"
-  packages = ["expfmt","internal/bitbucket.org/ww/goautoneg","model"]
+  packages = [
+    "expfmt",
+    "internal/bitbucket.org/ww/goautoneg",
+    "model"
+  ]
   revision = "2e54d0b93cba2fd133edc32211dcc32c06ef72ca"
 
 [[projects]]
   branch = "master"
   name = "github.com/prometheus/procfs"
-  packages = [".","xfs"]
+  packages = [
+    ".",
+    "xfs"
+  ]
   revision = "a6e9df898b1336106c743392c48ee0b71f5c4efa"
 
 [[projects]]
@@ -140,10 +171,15 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "image-reg-caching"
   name = "github.com/weaveworks/flux"
-  packages = ["image","metrics","registry","registry/middleware"]
-  revision = "5514161b10412babd558d3d16842524d29915f53"
+  packages = [
+    "image",
+    "metrics",
+    "registry",
+    "registry/middleware"
+  ]
+  revision = "f304fbeeff36672f9b43de132e7ede676b25a737"
+  version = "1.6.0"
 
 [[projects]]
   branch = "master"
@@ -160,7 +196,10 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
-  packages = ["unix","windows"]
+  packages = [
+    "unix",
+    "windows"
+  ]
   revision = "53aa286056ef226755cd898109dbcdaba8ac0b81"
 
 [[projects]]
@@ -175,9 +214,15 @@
   packages = ["."]
   revision = "22091886372e73de5d66168e8665775676ec13c5"
 
+[[projects]]
+  branch = "v26"
+  name = "gopkg.in/libgit2/git2go.v26"
+  packages = ["."]
+  revision = "4f0bb98c948b69054c0e32f5149480f76ab6e5e5"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "44308ff2984422a57872952018741b4d34c84d5c355b942ae533ca6d51c7e1e6"
+  inputs-digest = "95134f4fa00bd1d73c3cda192c7056a86712b85aaab7316fa8fb9833e0ce8f3f"
   solver-name = "gps-cdcl"
   solver-version = 1

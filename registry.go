@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/weaveworks/flux/registry"
-	"github.com/weaveworks/flux/image"
-	"github.com/weaveworks/flux/registry/middleware"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"github.com/weaveworks/flux/image"
+	"github.com/weaveworks/flux/registry"
+	"github.com/weaveworks/flux/registry/middleware"
 )
 
 const DockerConfigFile = "~/.docker/config.json"
 
 type registryOpts struct {
 	dockerConfig string
-	username        string
-	password        string
+	username     string
+	password     string
 }
 
 func (opts *registryOpts) addRegistryFlags(cmd *cobra.Command) {
@@ -29,7 +29,7 @@ func (opts *registryOpts) newRegistryClient(image image.Ref) (registry.Client, e
 	clientFactory := &registry.RemoteClientFactory{
 		Logger: nil,
 		Limiters: &middleware.RateLimiters{
-			RPS: 100,
+			RPS:   100,
 			Burst: 10,
 		},
 	}
@@ -50,7 +50,7 @@ func (opts *registryOpts) findConfiguredAuth() (registry.Credentials, error) {
 			return registry.Credentials{}, err
 		}
 		bytes, err := ioutil.ReadFile(path)
-		if creds, err := registry.ParseCredentials(bytes); err != nil {
+		if creds, err := registry.ParseCredentials(path, bytes); err != nil {
 			return creds, nil
 		}
 	}

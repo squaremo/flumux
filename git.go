@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	git "gopkg.in/libgit2/git2go.v24"
+	git "gopkg.in/libgit2/git2go.v26"
 )
 
 type gitOpts struct {

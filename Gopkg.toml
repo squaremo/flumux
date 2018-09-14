@@ -20,17 +20,5 @@
 #  version = "2.4.0"
 
 [[constraint]]
-  name = "github.com/weaveworks/flux"
-  branch = "image-reg-caching"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/mitchellh/go-homedir"
-
-[[constraint]]
-  name = "github.com/spf13/cobra"
-  version = "0.0.1"
-
-[[constraint]]
-  branch = "v24"
-  name = "gopkg.in/libgit2/git2go.v24"
+  branch = "v26"
+  name = "gopkg.in/libgit2/git2go.v26"
